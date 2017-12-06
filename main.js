@@ -25,6 +25,8 @@ firebase.initializeApp(config);
 
 var color = firebase.database().ref('id/' + getParameterByName("id"));
 color.on("value", function(colors) {
-  document.getElementById("color_1").style = "background-color: " + colors.val().color.color_1
-  document.getElementById("color_2").style = "background-color: " + colors.val().color.color_2  
+  document.getElementById("img1_1").setAttribute("hidden", "hidden")
+  document.getElementById("img1_2").setAttribute("hidden", "hidden")
+  document.getElementById(colors.val().color.color_1 + "_1").removeAttribute("hidden")
+  document.getElementById(colors.val().color.color_2 + "_2").removeAttribute("hidden")
 });
