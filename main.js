@@ -18,7 +18,8 @@ var idCount = firebase.database().ref('idCount');
 
 var color
 window.onbeforeunload = function(){
-  idCount.set(count-1)
+  alert(lastID)
+  idCount.set(lastID-1)
 }
 
 callback = function(colors) { 
