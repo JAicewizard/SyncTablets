@@ -39,9 +39,8 @@ color.on("value", function(colors) {
        image.id = "img_"+i;
        image.src = "assets/img_"+i+".png";
        image.setAttribute("hidden","hidden");
-      
-       
        document.getElementById("images").appendChild(image);
+       console.log(i)
    }
   }
   code = {}
@@ -53,9 +52,11 @@ color.on("value", function(colors) {
     if(string == ""){
         if(!isNaN(code[i-1])){
           var img = document.getElementById("img_"+code[i-1]);
+          
           img.removeAttribute("hidden");
           if(document.getElementById("color_"+i).firstElementChild!=null){
-            document.getElementById("color_"+i).firstElementChild.remove();
+            oldImg=document.getElementById("color_"+i).firstElementChild;
+            document.getElementById("images").appendChild(oldImg)
           }
           document.getElementById("color_"+i).appendChild(img);
           document.getElementById("color_"+i).firstElementChild.setAttribute("min-width","100%");
@@ -66,7 +67,8 @@ color.on("value", function(colors) {
     }else{
       console.log("its a colour-code")
       if(document.getElementById("color_"+i).firstElementChild!=null){
-        document.getElementById("color_"+i).firstElementChild.remove();
+        oldImg=document.getElementById("color_"+i).firstElementChild;
+        document.getElementById("images").appendChild(oldImg)
       }
       document.getElementById("color_"+i).style.backgroundColor = string;
     }

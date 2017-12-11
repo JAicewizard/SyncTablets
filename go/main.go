@@ -37,8 +37,8 @@ func calcColours(lastTime time.Time) {
 	random2 = rand.Intn(len(options)) + 1
 	log.Println(options[random])
 	log.Println(random)
-	log.Println(options[random])
-	log.Println(random)
+	log.Println(options[random2])
+	log.Println(random2)
 	log.Println("----------------------------------------------------")
 
 	body := strings.NewReader(
