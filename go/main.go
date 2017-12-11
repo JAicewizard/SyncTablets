@@ -19,7 +19,7 @@ var (
 	options      map[int]string
 	closing      bool
 	idCountTot   int
-	values       map[string]map[string]map[string]string
+	values       map[string]interface{}
 )
 
 func main() {
@@ -64,11 +64,10 @@ func calcColours(lastTime time.Time) {
 		newTime     time.Time
 		random      string
 		random2     string
-		idValues    map[string]map[string]string
+		idValues    map[string]interface{}
 		colorValues map[string]string
 	)
 
-	newTime = time.Now()
 	diference = time.Since(lastTime)
 	if closing {
 		log.Println("closing down")
@@ -76,21 +75,23 @@ func calcColours(lastTime time.Time) {
 	} else if diference > 0 {
 		time.Sleep(time.Second*3 - diference)
 	}
-	values = make(map[string]map[string]map[string]string, idCountTot)
+	newTime = time.Now()
+	values = make(map[string]interface{}, idCountTot)
 	random = options[rand.Intn(len(options))+1]
 	for i := 1; i < idCountTot; i++ {
-		idValues = make(map[string]map[string]string)
+		idValues = make(map[string]interface{})
 		colorValues = make(map[string]string)
 		random2 = options[rand.Intn(len(options))+1]
 		colorValues["color_1"] = random
 		colorValues["color_2"] = random2
 		idValues["color"] = colorValues
+		idValues["pictures"] = "4"
 		values[strconv.Itoa(i)] = idValues
 		random = random2
 	}
 	bits, _ := json.Marshal(values)
 	body := bytes.NewReader(bits)
-	log.Println(string(bits))
+	//log.Println(string(bits))
 	req, err := http.NewRequest("PUT", "https://synchronozedtablets.firebaseio.com/id.json", body)
 	if err != nil {
 		// handle err
@@ -102,6 +103,7 @@ func calcColours(lastTime time.Time) {
 		// handle err
 	}
 	resp.Body.Close()
+	println("---------------------------------------------------------------------")
 	calcColours(newTime)
 }
 
@@ -127,8 +129,10 @@ func getCurrentIDs(lastTime time.Time) {
 		log.Print(err)
 	}
 
-	idCountTot, _ = strconv.Atoi(string(idCount))
-	idCountTot = idCountTot + 10
+	idCountTot1, _ := strconv.Atoi(string(idCount))
+	idCountTot = idCountTot1 + 10
+	println(idCountTot)
+
 	newTime = time.Now()
 	diference = time.Since(lastTime)
 	if closing {
