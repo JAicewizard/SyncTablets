@@ -58,7 +58,8 @@ color.on("value", function(colors) {
             document.getElementById("color_"+i).firstElementChild.remove();
           }
           document.getElementById("color_"+i).appendChild(img);
-          document.getElementById("color_"+i).firstElementChild.setAttribute("width","100%");
+          document.getElementById("color_"+i).firstElementChild.setAttribute("min-width","100%");
+          
         }else{
 
         }
