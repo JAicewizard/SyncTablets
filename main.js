@@ -51,6 +51,9 @@ color.on("value", function(colors) {
     string = getColorCSS(code[i-1]);
     if(string == ""){
         if(!isNaN(code[i-1])){
+          document.getElementById("color_"+i).style.backgroundColor = "white";
+          
+
           var img = document.getElementById("img_"+code[i-1]);
           
           img.removeAttribute("hidden");
