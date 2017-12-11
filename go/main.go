@@ -62,23 +62,26 @@ func calcColours(lastTime time.Time) {
 }
 
 func main() {
+	var (
+		colours []string
+	)
+	options = make(map[int]string, amountImages+len(colours)+1)
+
 	totImages, _ := strconv.ParseInt(os.Args[2], 0, 46)
 	amountImages = int(totImages)
-	options = make(map[int]string)
+
 	input := os.Args[1]
-	var colours []string
 	log.Println(input)
 	_ = json.Unmarshal([]byte(input), &colours)
 	log.Printf("Unmarshaled: %v", colours)
 	i := 1
-	options = make(map[int]string, amountImages+len(colours))
 
 	for ; i <= amountImages; i++ {
 		options[i] = strconv.Itoa(i)
 		println(options[i])
 	}
 	a := i - 1
-	for i := 1; i < len(colours); i++ {
+	for i := 0; i < len(colours); i++ {
 		options[a+i] = colours[i]
 	}
 	log.Println(options)
