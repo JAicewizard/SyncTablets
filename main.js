@@ -26,10 +26,16 @@ callback = function(colors) {
     load = 0;
     for(i=1;i<=colors.val().pictures;i++){
         var image = document.createElement("img");
-        image.id = "img_"+i;
+        image.id = "img_"+i+"_1";
         image.src = "assets/img_"+i+".png";
         image.setAttribute("hidden","hidden");
         document.getElementById("images").appendChild(image);
+        image = document.createElement("img");
+        image.src = "assets/img_"+i+".png";
+        image.setAttribute("hidden","hidden");
+        image.id = "img_"+i+"_2";        
+        document.getElementById("images").appendChild(image);
+        
         console.log(i)
     }
   }
@@ -44,7 +50,7 @@ callback = function(colors) {
           document.getElementById("color_"+i).style.backgroundColor = "white";
           
 
-          var img = document.getElementById("img_"+code[i-1]);
+          var img = document.getElementById("img_"+code[i-1]+"_"+i);
           
           img.removeAttribute("hidden");
           if(document.getElementById("color_"+i).firstElementChild!=null){
@@ -77,13 +83,14 @@ window.onload = function(){
   idCount.on("value", function(Count){
     count = Count.val()
     if(count<lastID | pageLoaded==0){
+      lastID=count
       CurrentID=count+1;        
       color = firebase.database().ref('id/' + CurrentID);        
       pageLoaded = 1;
       setupStuf()
-      idCount.set(count);
+      idCount.set(count+1);
       pageLoaded=1
-    } 
+    }
     lastID=count
   });
 }
