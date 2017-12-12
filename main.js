@@ -3,7 +3,7 @@ pageLoaded = 0;
 load = 1;
 currentIDs = 0;
 lastID = 0
-
+reset = 0
 var config = {
   apiKey: "AIzaSyC3HKA1lIaS637z1IvKDugMFMELWkFlpwQ",
   authDomain: "synchronozedtablets.firebaseapp.com",
@@ -17,10 +17,22 @@ var idCount = firebase.database().ref('idCount');
 
 
 var color
+
 window.onbeforeunload = function(){
-  alert(lastID)
-  idCount.set(lastID-1)
-}
+  var idCount2 = firebase.database().ref('idCount');  
+  console.log(lastID-1);
+  idCount2.set(lastID-1);
+  reset=1;
+  return "You've modified your fiddle, reloading the page will reset all changes.";
+
+};
+
+window.unload = function(){
+  console.log(lastID-1);
+  console.log(lastID-1);
+  idCount.set(lastID-1);
+  return "hello world exit";
+};
 
 callback = function(colors) { 
   if(load == 1){
@@ -83,7 +95,7 @@ setupStuf = function(){
 window.onload = function(){
   idCount.on("value", function(Count){
     count = Count.val()
-    if(count<lastID | pageLoaded==0){
+    if(count<lastID | pageLoaded==0 && reset==0){
       lastID=count
       CurrentID=count+1;        
       color = firebase.database().ref('id/' + CurrentID);        
