@@ -95,7 +95,7 @@ setupStuf = function(){
 window.onload = function(){
   idCount.on("value", function(Count){
     count = Count.val()
-    if(count<lastID | pageLoaded==0 && reset==0){
+    if((count<lastID && count < CurrentID) | pageLoaded==0 && reset==0){
       lastID=count
       CurrentID=count+1;        
       color = firebase.database().ref('id/' + CurrentID);        
