@@ -4,6 +4,19 @@ load = 1;
 currentIDs = 0;
 lastID = 0
 reset = 0
+var picture_count = 4;
+function getParameterByName( name ){
+  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+  var regexS = "[\\?&]"+name+"=([^&#]*)";
+  var regex = new RegExp( regexS );
+  var results = regex.exec( window.location.href );
+  if( results == null )
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+var id = getParameterByName("id");
+
 var config = {
   apiKey: "AIzaSyC3HKA1lIaS637z1IvKDugMFMELWkFlpwQ",
   authDomain: "synchronozedtablets.firebaseapp.com",
@@ -26,86 +39,57 @@ window.onbeforeunload = function(){
 
 };
 
-window.unload = function(){
-  console.log(lastID-1);
-  console.log(lastID-1);
-  idCount.set(lastID-1);
-  return "hello world exit";
-};
+var previous = {
+  1: 1,
+  2: 1
+}
 
 callback = function(colors) { 
-  if(load == 1){
-    load = 0;
-    for(i=1;i<=colors.val().pictures;i++){
-      var image = document.createElement("img");
-      image.id = "img_"+i+"_1";
-      image.src = "assets/img_"+i+".png";
-      image.setAttribute("hidden","hidden");
-      document.getElementById("images").appendChild(image);
-      image = document.createElement("img");
-      image.src = "assets/img_"+i+".png";
-      image.setAttribute("hidden","hidden");
-      image.id = "img_"+i+"_2";        
-      document.getElementById("images").appendChild(image);
-      
-      console.log(i)
-    }
-  }
   code = {}
   code[0] = colors.val().color.color_1;
   code[1] = colors.val().color.color_2;
-  for(i=1;i<=2;i++){
-    console.log(code[i-1]);
-    string = getColorCSS(code[i-1]);
-    if(string == ""){
-        if(!isNaN(code[i-1])){
-          document.getElementById("color_"+i).style.backgroundColor = "white";
-          
+  console.info(parseInt(code[0]) == NaN)
+  console.info(parseInt(code[1]) == NaN)
 
-          var img = document.getElementById("img_"+code[i-1]+"_"+i);
-          
-          img.removeAttribute("hidden");
-          if(document.getElementById("color_"+i).firstElementChild!=null){
-            oldImg=document.getElementById("color_"+i).firstElementChild;
-            document.getElementById("images").appendChild(oldImg)
-          }
-          document.getElementById("color_"+i).appendChild(img);
-          document.getElementById("color_"+i).firstElementChild.setAttribute("min-width","100%");
-          
-        }else{
+  if (isNaN(code[0])) {
+      document.getElementById("img_" + previous[1] + "_1").setAttribute("hidden","hidden");
+      document.getElementById("color_1").style.backgroundColor = code[0]
+  } else {
+      document.getElementById("img_" + previous[1] + "_1").setAttribute("hidden","hidden");
+      document.getElementById("color_1").style.backgroundColor = "white"
+      document.getElementById("img_" + code[0] + "_1").removeAttribute("hidden")
+      previous[1] = code[0]
+  }
 
-        }
-    }else{
-      console.log("its a colour-code")
-      if(document.getElementById("color_"+i).firstElementChild!=null){
-        oldImg=document.getElementById("color_"+i).firstElementChild;
-        document.getElementById("images").appendChild(oldImg)
-      }
-      document.getElementById("color_"+i).style.backgroundColor = string;
-    }
+  if (isNaN(code[1])) {
+      document.getElementById("img_" + previous[2] + "_2").setAttribute("hidden","hidden");
+      document.getElementById("color_2").style.backgroundColor = code[1]
+  } else {
+      console.log("stage2")
+      document.getElementById("img_" + previous[2] + "_2").setAttribute("hidden","hidden");
+      document.getElementById("color_2").style.backgroundColor = "white"
+      document.getElementById("img_" + code[1] + "_2").removeAttribute("hidden")
+      previous[2] = code[1]
   }
 }
 
-setupStuf = function(){
-  color = firebase.database().ref('id/' + CurrentID);          
-  color.on("value", callback);
 
-}
+window.onload =  function() {
+  for (i = 1; i <= picture_count; i++) {
+    var image = document.createElement("img");
+    image.id = "img_"+i+"_1";
+    image.src = "assets/img_"+i+".png";
+    image.setAttribute("hidden","hidden");
+    image.setAttribute("style", "height: 100%;")
+    document.getElementById("color_1").appendChild(image);
 
-window.onload = function(){
-  idCount.on("value", function(Count){
-    count = Count.val()
-    if((count<lastID && count < CurrentID) | pageLoaded==0 && reset==0){
-      lastID=count
-      CurrentID=count+1;        
-      color = firebase.database().ref('id/' + CurrentID);        
-      pageLoaded = 1;
-      setupStuf()
-      idCount.set(count+1);
-      pageLoaded=1
-    }
-    lastID=count
-  });
+    image = document.createElement("img");
+    image.src = "assets/img_"+i+".png";
+    image.setAttribute("hidden","hidden");
+    image.setAttribute("style", "height: 100%;")
+    image.id = "img_"+i+"_2";        
+    document.getElementById("color_2").appendChild(image);
+  }
 }
 
 function getColorCSS(c) {
