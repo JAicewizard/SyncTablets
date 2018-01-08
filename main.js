@@ -15,7 +15,6 @@ var config = {
 firebase.initializeApp(config);
 var idCount = firebase.database().ref('idCount');
 
-
 var color
 
 window.onbeforeunload = function(){
@@ -38,18 +37,18 @@ callback = function(colors) {
   if(load == 1){
     load = 0;
     for(i=1;i<=colors.val().pictures;i++){
-        var image = document.createElement("img");
-        image.id = "img_"+i+"_1";
-        image.src = "assets/img_"+i+".png";
-        image.setAttribute("hidden","hidden");
-        document.getElementById("images").appendChild(image);
-        image = document.createElement("img");
-        image.src = "assets/img_"+i+".png";
-        image.setAttribute("hidden","hidden");
-        image.id = "img_"+i+"_2";        
-        document.getElementById("images").appendChild(image);
-        
-        console.log(i)
+      var image = document.createElement("img");
+      image.id = "img_"+i+"_1";
+      image.src = "assets/img_"+i+".png";
+      image.setAttribute("hidden","hidden");
+      document.getElementById("images").appendChild(image);
+      image = document.createElement("img");
+      image.src = "assets/img_"+i+".png";
+      image.setAttribute("hidden","hidden");
+      image.id = "img_"+i+"_2";        
+      document.getElementById("images").appendChild(image);
+      
+      console.log(i)
     }
   }
   code = {}
@@ -90,6 +89,7 @@ callback = function(colors) {
 setupStuf = function(){
   color = firebase.database().ref('id/' + CurrentID);          
   color.on("value", callback);
+
 }
 
 window.onload = function(){
