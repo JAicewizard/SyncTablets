@@ -1,5 +1,5 @@
 var picture_count = 4;
-CurrentID = 1;
+CurrentID = 0;
 lastID = 0
 pageLoaded = 0;
 reset = 0
@@ -67,19 +67,18 @@ var previous = {
 setupStuf = function(){
     color = firebase.database().ref('id/' + CurrentID);          
     color.on("value", callback);
-  
 }
 
 
 window.onload =  function() {
     idCount.on("value", function(Count){
         count = Count.val()
-        if((count<lastID && count < CurrentID) | pageLoaded==0 && reset==0){
+        if((count < CurrentID) | pageLoaded==0 && reset==0){
           lastID=count
           CurrentID=count+1;        
-          color = firebase.database().ref('id/' + CurrentID);        
           pageLoaded = 1;
           setupStuf()
+          console.log("reloaded config")
           idCount.set(count+1);
           pageLoaded=1
         }
@@ -103,4 +102,4 @@ window.onload =  function() {
     }
 }
 
-firebase.database().ref('id/' + id).on("value", callback)
+firebase.database().ref('id/' + CurrentID).on("value", callback)
