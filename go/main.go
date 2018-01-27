@@ -11,11 +11,12 @@ import (
 	"os/signal"
 	"strconv"
 	"time"
+	"math"
 )
 
 var (
 	amountImages int
-	colourList   []string
+	colours   []string
 	options      map[int]string
 	closing      bool
 	idCountTot   int
@@ -23,15 +24,11 @@ var (
 )
 
 func main() {
-	var (
-		colours []string
-	)
 	Time := time.Now()
-	go getCurrentIDs(Time)
 
 	options = make(map[int]string, amountImages+len(colours)+1)
-	totImages, _ := strconv.ParseInt(os.Args[2], 0, 46)
-	amountImages = int(totImages)
+	imagesCount, _ := strconv.ParseInt(os.Args[2], 0, 46)
+	amountImages = int(imagesCount)
 
 	input := os.Args[1]
 	log.Println(input)
@@ -47,15 +44,90 @@ func main() {
 		options[a+i] = colours[i]
 	}
 	log.Println(options)
-
-	go calcColours(Time)
-	go getCurrentIDs(Time)
-	var signal_channel chan os.Signal
-	signal_channel = make(chan os.Signal, 1)
-	signal.Notify(signal_channel, os.Interrupt)
-	<-signal_channel
+	if len(os.Args) < 4{
+		go calcColours(Time)
+		go getCurrentIDs(Time)
+	}else{
+		mode,_ := strconv.ParseInt(os.Args[3], 0, 46)
+		log.Println(mode)
+		log.Println(len(os.Args))
+		if(mode == 1 && len(os.Args) >= 5){
+			idCount, _ := strconv.ParseInt(os.Args[4], 0, 46)
+			idCountTot = int(idCount)
+			giveOver(Time, 0)
+			if(amountImages != 0){
+				log.Println("images are not supported yet")
+			}
+		}else{
+			log.Println("please enter the amount of tablets as the last argument")
+		}
+	}
+	
+	var signalChannel chan os.Signal
+	signalChannel = make(chan os.Signal, 1)
+	signal.Notify(signalChannel, os.Interrupt)
+	<-signalChannel
 	closing = true
 
+}
+
+func giveOver(lastTime time.Time, step int){
+	var(
+		diference   time.Duration
+		newTime     time.Time
+		array		[]string
+		array2		[]string
+		idValues    map[string]interface{}
+		colorValues map[string]string
+	)
+	diference = time.Since(lastTime)
+	if closing {
+		log.Println("closing down")
+		os.Exit(0)
+	} else if diference > 0 {
+		time.Sleep(time.Second*3 - diference)
+	}
+	array = make([]string, len(colours)*2)
+	array2 = make([]string, len(colours)*2)
+
+	for i, value := range colours {
+		array[i*2] =value
+		array[i*2+1] =value
+		array2[int(math.Mod(float64(i*2+1),float64(len(array2))))] = value
+		array2[int(math.Mod(float64(i*2+2),float64(len(array2))))] = value
+	}
+	log.Println(array)
+	log.Println(array2)
+	values = make(map[string]interface{}, idCountTot)
+
+	arrayLength := len(array)
+	for i := idCountTot; i > 0; i-- {
+		idValues = make(map[string]interface{})
+		colorValues = make(map[string]string)
+		colorValues["color_1"] = array[int(math.Mod(math.Abs(float64((i-1)*2-step)),float64(arrayLength)))]
+		colorValues["color_2"] = array2[int(math.Mod(math.Abs(float64((i-1)*2-step)),float64(arrayLength)))]
+		idValues["color"] = colorValues
+		idValues["pictures"] = "0"
+		values[strconv.Itoa(i)] = idValues
+	}
+	bits, _ := json.Marshal(values)
+	body := bytes.NewReader(bits)
+	//log.Println(string(bits))
+	req, err := http.NewRequest("PUT", "https://synchronozedtablets.firebaseio.com/id.json", body)
+	if err != nil {
+		// handle err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	resp.Body.Close()
+
+	newTime = time.Now()
+
+	giveOver(newTime, step+1)
 }
 
 func calcColours(lastTime time.Time) {
@@ -85,7 +157,7 @@ func calcColours(lastTime time.Time) {
 		colorValues["color_1"] = random
 		colorValues["color_2"] = random2
 		idValues["color"] = colorValues
-		idValues["pictures"] = "4"
+		idValues["pictures"] = amountImages
 		values[strconv.Itoa(i)] = idValues
 		random = random2
 	}

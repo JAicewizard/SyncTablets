@@ -4,7 +4,7 @@ lastID = 0
 pageLoaded = 0;
 reset = 0
 
-function getParameterByName( name ){
+/*function getParameterByName( name ){
     name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
     var regexS = "[\\?&]"+name+"=([^&#]*)";
     var regex = new RegExp( regexS );
@@ -13,9 +13,9 @@ function getParameterByName( name ){
       return "";
     else
       return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
+}*/
 
-var id = getParameterByName("id");
+//var id = getParameterByName("id");
 
 var config = {
     apiKey: "AIzaSyC3HKA1lIaS637z1IvKDugMFMELWkFlpwQ",
@@ -67,11 +67,23 @@ var previous = {
 setupStuf = function(){
     color = firebase.database().ref('id/' + CurrentID);          
     color.on("value", callback);
+    
+
+
+}
+
+function getid(){
+    CurrentID=document.getElementById('textInput').value
+    document.getElementById("table").style.height="100%"
+    document.getElementById("idInput").setAttribute("hidden","hidden");
+    setupStuf()
+
+
 }
 
 
 window.onload =  function() {
-    idCount.on("value", function(Count){
+    /*idCount.on("value", function(Count){
         count = Count.val()
         if((count < CurrentID) | pageLoaded==0 && reset==0){
           lastID=count
@@ -83,21 +95,21 @@ window.onload =  function() {
           pageLoaded=1
         }
         lastID=count
-      });
+      });*/
     for (i = 1; i <= picture_count; i++) {
         var image = document.createElement("img");
         image.id = "img_"+i+"_1";
         image.src = "assets/img_"+i+".png";
         image.setAttribute("hidden","hidden");
-        image.setAttribute("style", 'min-height: 100%; min-width:100%;  align="middle"')
+        image.setAttribute("style", 'min-height: 100%; min-width:100%;  float: left')
         document.getElementById("color_1").appendChild(image);
 
         image = document.createElement("img");
+        image.id = "img_"+i+"_2";        
         image.src = "assets/img_"+i+".png";
         image.setAttribute("hidden","hidden");
-        image.setAttribute("style", 'min-height: 100%; min-width:100%; align="middle"')
+        image.setAttribute("style", 'min-height: 100%; min-width:100%; float:right')
         
-        image.id = "img_"+i+"_2";        
         document.getElementById("color_2").appendChild(image);
     }
 }
