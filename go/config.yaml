@@ -1,0 +1,13 @@
+---
+colours:  #colours to be displayed
+  - 'green'
+  - 'blue'
+  - 'yellow'
+  - 'pink'
+imagesCount: 0 #amount of images to be displayed
+
+settings:
+  includeColours: true  #use colours
+  includeImages: false  #use images
+  mode: 1               #TODO
+  screens: 6            #the amount of screens that need to be set

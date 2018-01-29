@@ -3,66 +3,73 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"time"
-	"math"
+
+	"gopkg.in/yaml.v2"
 )
 
+type config struct {
+	Colours     []string `yaml:"colours"`
+	ImagesCount uint64   `yaml:"imagesCount"`
+	Settings    struct {
+		IncludeColours bool   `yaml:"includeColours"`
+		IncludeImages  bool   `yaml:"includeImages"`
+		Mode           int64  `yaml:"mode"`
+		ScreenCount    uint64 `yaml:"screens"`
+	} `yaml:"settings`
+}
+
 var (
-	amountImages int
-	colours   []string
-	options      map[int]string
-	closing      bool
-	idCountTot   int
-	values       map[string]interface{}
+	options  []string
+	closing  bool
+	settings config
+	values   map[string]interface{}
 )
 
 func main() {
-	Time := time.Now()
-
-	options = make(map[int]string, amountImages+len(colours)+1)
-	imagesCount, _ := strconv.ParseInt(os.Args[2], 0, 46)
-	amountImages = int(imagesCount)
-
-	input := os.Args[1]
-	log.Println(input)
-	_ = json.Unmarshal([]byte(input), &colours)
-	log.Printf("Unmarshaled: %v", colours)
-	i := 1
-
-	for ; i <= amountImages; i++ {
-		options[i] = strconv.Itoa(i)
+	configFile, err := ioutil.ReadFile("config.yaml")
+	if err != nil {
+		log.Print("could not open config file")
 	}
-	a := i - 1
-	for i := 0; i < len(colours); i++ {
-		options[a+i] = colours[i]
-	}
+	fmt.Printf("File contents: %s", configFile)
+	yaml.Unmarshal(configFile, &settings)
+	fmt.Printf("%+v\n", settings)
 	log.Println(options)
-	if len(os.Args) < 4{
-		go calcColours(Time)
-		go getCurrentIDs(Time)
-	}else{
-		mode,_ := strconv.ParseInt(os.Args[3], 0, 46)
-		log.Println(mode)
-		log.Println(len(os.Args))
-		if(mode == 1 && len(os.Args) >= 5){
-			idCount, _ := strconv.ParseInt(os.Args[4], 0, 46)
-			idCountTot = int(idCount)
-			giveOver(Time, 0)
-			if(amountImages != 0){
-				log.Println("images are not supported yet")
-			}
-		}else{
-			log.Println("please enter the amount of tablets as the last argument")
+
+	if settings.Settings.IncludeImages {
+		for i := uint64(1); i <= settings.ImagesCount; i++ {
+			log.Println("added" + strconv.FormatUint(i, 10))
+			options = append(options, strconv.FormatUint(i, 10))
 		}
 	}
-	
+	if settings.Settings.IncludeColours {
+		log.Println("colours are included")
+		log.Println(len(settings.Colours))
+		for i := 0; i < len(settings.Colours); i++ {
+			log.Println("added" + settings.Colours[i])
+			options = append(options, settings.Colours[i])
+		}
+	}
+	fmt.Println(options)
+	fmt.Println(options)
+
+	Time := time.Now()
+	switch settings.Settings.Mode {
+	case 0:
+		calcColours(Time)
+	case 1:
+		giveOver(Time, 0)
+	}
+
 	var signalChannel chan os.Signal
 	signalChannel = make(chan os.Signal, 1)
 	signal.Notify(signalChannel, os.Interrupt)
@@ -71,12 +78,12 @@ func main() {
 
 }
 
-func giveOver(lastTime time.Time, step int){
-	var(
+func giveOver(lastTime time.Time, step uint64) {
+	var (
 		diference   time.Duration
 		newTime     time.Time
-		array		[]string
-		array2		[]string
+		array       []string
+		array2      []string
 		idValues    map[string]interface{}
 		colorValues map[string]string
 	)
@@ -87,28 +94,29 @@ func giveOver(lastTime time.Time, step int){
 	} else if diference > 0 {
 		time.Sleep(time.Second*3 - diference)
 	}
-	array = make([]string, len(colours)*2)
-	array2 = make([]string, len(colours)*2)
+	array = make([]string, len(settings.Colours)*2)
+	array2 = make([]string, len(settings.Colours)*2)
 
-	for i, value := range colours {
-		array[i*2] =value
-		array[i*2+1] =value
-		array2[int(math.Mod(float64(i*2+1),float64(len(array2))))] = value
-		array2[int(math.Mod(float64(i*2+2),float64(len(array2))))] = value
+	for i, value := range settings.Colours {
+		array[i*2] = value
+		array[i*2+1] = value
+		array2[int(math.Mod(float64(i*2+1), float64(len(array2))))] = value
+		array2[int(math.Mod(float64(i*2+2), float64(len(array2))))] = value
 	}
 	log.Println(array)
 	log.Println(array2)
-	values = make(map[string]interface{}, idCountTot)
+	values = make(map[string]interface{}, settings.Settings.ScreenCount)
 
 	arrayLength := len(array)
-	for i := idCountTot; i > 0; i-- {
+	for i := settings.Settings.ScreenCount; i > 0; i-- {
+		println(int(math.Mod(math.Abs(float64((i-1)*2-step)), float64(arrayLength))))
 		idValues = make(map[string]interface{})
 		colorValues = make(map[string]string)
-		colorValues["color_1"] = array[int(math.Mod(math.Abs(float64((i-1)*2-step)),float64(arrayLength)))]
-		colorValues["color_2"] = array2[int(math.Mod(math.Abs(float64((i-1)*2-step)),float64(arrayLength)))]
+		colorValues["color_1"] = array[int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))]
+		colorValues["color_2"] = array2[int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))]
 		idValues["color"] = colorValues
 		idValues["pictures"] = "0"
-		values[strconv.Itoa(i)] = idValues
+		values[strconv.FormatUint(settings.Settings.ScreenCount-i+1, 10)] = idValues
 	}
 	bits, _ := json.Marshal(values)
 	body := bytes.NewReader(bits)
@@ -148,17 +156,18 @@ func calcColours(lastTime time.Time) {
 		time.Sleep(time.Second*3 - diference)
 	}
 	newTime = time.Now()
-	values = make(map[string]interface{}, idCountTot)
+	values = make(map[string]interface{}, settings.Settings.ScreenCount)
+	fmt.Println(len(options))
 	random = options[rand.Intn(len(options))+1]
-	for i := 1; i < idCountTot; i++ {
+	for i := uint64(1); i < settings.Settings.ScreenCount; i++ {
 		idValues = make(map[string]interface{})
 		colorValues = make(map[string]string)
 		random2 = options[rand.Intn(len(options))+1]
 		colorValues["color_1"] = random
 		colorValues["color_2"] = random2
 		idValues["color"] = colorValues
-		idValues["pictures"] = amountImages
-		values[strconv.Itoa(i)] = idValues
+		idValues["pictures"] = settings.ImagesCount
+		values[strconv.FormatUint(i, 10)] = idValues
 		random = random2
 	}
 	bits, _ := json.Marshal(values)
@@ -184,7 +193,7 @@ func getCurrentIDs(lastTime time.Time) {
 	var (
 		diference time.Duration
 		newTime   time.Time
-		idCount   []byte
+		//idCount   []byte
 	)
 
 	log.Println("im here now")
@@ -196,14 +205,13 @@ func getCurrentIDs(lastTime time.Time) {
 	}
 	log.Println(resp)
 	defer resp.Body.Close()
-	idCount, err = ioutil.ReadAll(resp.Body)
+	//idCount, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Print(err)
 	}
 
-	idCountTot1, _ := strconv.Atoi(string(idCount))
-	idCountTot = idCountTot1 + 10
-	println(idCountTot)
+	//idCountTot1, _ := strconv.Atoi(string(idCount))
+	//settings.Settings.ScreenCount = uint64(idCountTot1 + 10)
 
 	newTime = time.Now()
 	diference = time.Since(lastTime)
