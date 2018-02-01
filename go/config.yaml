@@ -11,3 +11,4 @@ settings:
   includeImages: false  #use images
   mode: 1               #TODO
   screens: 6            #the amount of screens that need to be set
+  delay: 5              #the delay between slide showss

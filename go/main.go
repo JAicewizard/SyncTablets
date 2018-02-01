@@ -25,6 +25,7 @@ type config struct {
 		IncludeImages  bool   `yaml:"includeImages"`
 		Mode           int64  `yaml:"mode"`
 		ScreenCount    uint64 `yaml:"screens"`
+		delay          uint   `yaml:"delay"`
 	} `yaml:"settings`
 }
 
@@ -92,7 +93,7 @@ func giveOver(lastTime time.Time, step uint64) {
 		log.Println("closing down")
 		os.Exit(0)
 	} else if diference > 0 {
-		time.Sleep(time.Second*3 - diference)
+		time.Sleep(time.Second*time.Duration(settings.Settings.delay) - diference)
 	}
 	array = make([]string, len(settings.Colours)*2)
 	array2 = make([]string, len(settings.Colours)*2)
@@ -103,8 +104,10 @@ func giveOver(lastTime time.Time, step uint64) {
 		array2[int(math.Mod(float64(i*2+1), float64(len(array2))))] = value
 		array2[int(math.Mod(float64(i*2+2), float64(len(array2))))] = value
 	}
+
 	log.Println(array)
 	log.Println(array2)
+
 	values = make(map[string]interface{}, settings.Settings.ScreenCount)
 
 	arrayLength := len(array)
@@ -112,8 +115,9 @@ func giveOver(lastTime time.Time, step uint64) {
 		println(int(math.Mod(math.Abs(float64((i-1)*2-step)), float64(arrayLength))))
 		idValues = make(map[string]interface{})
 		colorValues = make(map[string]string)
-		colorValues["color_1"] = array[int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))]
-		colorValues["color_2"] = array2[int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))]
+		currentStep := int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))
+		colorValues["color_1"] = array[currentStep]
+		colorValues["color_2"] = array2[currentStep]
 		idValues["color"] = colorValues
 		idValues["pictures"] = "0"
 		values[strconv.FormatUint(settings.Settings.ScreenCount-i+1, 10)] = idValues
@@ -153,7 +157,7 @@ func calcColours(lastTime time.Time) {
 		log.Println("closing down")
 		os.Exit(0)
 	} else if diference > 0 {
-		time.Sleep(time.Second*3 - diference)
+		time.Sleep(time.Second*time.Duration(settings.Settings.delay) - diference)
 	}
 	newTime = time.Now()
 	values = make(map[string]interface{}, settings.Settings.ScreenCount)
