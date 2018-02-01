@@ -76,7 +76,6 @@ func main() {
 	signal.Notify(signalChannel, os.Interrupt)
 	<-signalChannel
 	closing = true
-
 }
 
 func giveOver(lastTime time.Time, step uint64) {
