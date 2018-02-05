@@ -25,7 +25,7 @@ type config struct {
 		IncludeImages  bool   `yaml:"includeImages"`
 		Mode           int64  `yaml:"mode"`
 		ScreenCount    uint64 `yaml:"screens"`
-		delay          uint   `yaml:"delay"`
+		Delay          uint   `yaml:"delay"`
 	} `yaml:"settings`
 }
 
@@ -62,13 +62,17 @@ func main() {
 	}
 	fmt.Println(options)
 	fmt.Println(options)
-
 	Time := time.Now()
+
 	switch settings.Settings.Mode {
 	case 0:
 		calcColours(Time)
 	case 1:
-		giveOver(Time, 0)
+		giveOver(0)
+	case 2:
+		giveOver(1)
+	case 3:
+		giveOver(2)
 	}
 
 	var signalChannel chan os.Signal
@@ -78,7 +82,7 @@ func main() {
 	closing = true
 }
 
-func giveOver(lastTime time.Time, step uint64) {
+func giveOver(mode uint64) {
 	var (
 		diference   time.Duration
 		newTime     time.Time
@@ -86,59 +90,74 @@ func giveOver(lastTime time.Time, step uint64) {
 		array2      []string
 		idValues    map[string]interface{}
 		colorValues map[string]string
+		step        uint64
 	)
-	diference = time.Since(lastTime)
-	if closing {
-		log.Println("closing down")
-		os.Exit(0)
-	} else if diference > 0 {
-		time.Sleep(time.Second*time.Duration(settings.Settings.delay) - diference)
-	}
-	array = make([]string, len(settings.Colours)*2)
-	array2 = make([]string, len(settings.Colours)*2)
-
-	for i, value := range settings.Colours {
-		array[i*2] = value
-		array[i*2+1] = value
-		array2[int(math.Mod(float64(i*2+1), float64(len(array2))))] = value
-		array2[int(math.Mod(float64(i*2+2), float64(len(array2))))] = value
-	}
-
-	log.Println(array)
-	log.Println(array2)
-
-	values = make(map[string]interface{}, settings.Settings.ScreenCount)
-
-	arrayLength := len(array)
-	for i := settings.Settings.ScreenCount; i > 0; i-- {
-		println(int(math.Mod(math.Abs(float64((i-1)*2-step)), float64(arrayLength))))
-		idValues = make(map[string]interface{})
-		colorValues = make(map[string]string)
-		currentStep := int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))
-		colorValues["color_1"] = array[currentStep]
-		colorValues["color_2"] = array2[currentStep]
-		idValues["color"] = colorValues
-		idValues["pictures"] = "0"
-		values[strconv.FormatUint(settings.Settings.ScreenCount-i+1, 10)] = idValues
-	}
-	bits, _ := json.Marshal(values)
-	body := bytes.NewReader(bits)
-	//log.Println(string(bits))
-	req, err := http.NewRequest("PUT", "https://synchronozedtablets.firebaseio.com/id.json", body)
-	if err != nil {
-		// handle err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		// handle err
-	}
-	resp.Body.Close()
-
 	newTime = time.Now()
+	step = 0
+	Dstep := uint64(1)
+	if mode != 0 {
+		Dstep = 2
+	}
+	if mode == 1 {
+		step = 1
+	}
 
-	giveOver(newTime, step+1)
+	for i := 1; i < 2; step = step + Dstep {
+
+		diference = time.Since(newTime)
+
+		if closing {
+			log.Println("closing down")
+			os.Exit(0)
+		} else if diference > 0 {
+			time.Sleep(time.Second*time.Duration(settings.Settings.Delay) - diference)
+			log.Println(settings.Settings.Delay)
+		}
+		newTime = time.Now()
+
+		array = make([]string, len(settings.Colours)*2)
+		array2 = make([]string, len(settings.Colours)*2)
+
+		for i, value := range settings.Colours {
+			array[i*2] = value
+			array[i*2+1] = value
+			array2[int(math.Mod(float64(i*2+1), float64(len(array2))))] = value
+			array2[int(math.Mod(float64(i*2+2), float64(len(array2))))] = value
+		}
+
+		//log.Println(array)
+		//log.Println(array2)
+
+		values = make(map[string]interface{}, settings.Settings.ScreenCount)
+
+		arrayLength := len(array)
+		for i := settings.Settings.ScreenCount; i > 0; i-- {
+			//println(int(math.Mod(math.Abs(float64((i-1)*2-step)), float64(arrayLength))))
+			idValues = make(map[string]interface{})
+			colorValues = make(map[string]string)
+			currentStep := int(math.Mod(math.Abs(float64((i-1)*2+step)), float64(arrayLength)))
+			colorValues["color_1"] = array[currentStep]
+			colorValues["color_2"] = array2[currentStep]
+			idValues["color"] = colorValues
+			idValues["pictures"] = "0"
+			values[strconv.FormatUint(settings.Settings.ScreenCount-i+1, 10)] = idValues
+		}
+		bits, _ := json.Marshal(values)
+		body := bytes.NewReader(bits)
+		//log.Println(string(bits))
+		req, err := http.NewRequest("PUT", "https://synchronozedtablets.firebaseio.com/id.json", body)
+		if err != nil {
+			// handle err
+		}
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			// handle err
+		}
+		resp.Body.Close()
+
+	}
 }
 
 func calcColours(lastTime time.Time) {
@@ -156,7 +175,7 @@ func calcColours(lastTime time.Time) {
 		log.Println("closing down")
 		os.Exit(0)
 	} else if diference > 0 {
-		time.Sleep(time.Second*time.Duration(settings.Settings.delay) - diference)
+		time.Sleep(time.Second*time.Duration(settings.Settings.Delay) - diference)
 	}
 	newTime = time.Now()
 	values = make(map[string]interface{}, settings.Settings.ScreenCount)
