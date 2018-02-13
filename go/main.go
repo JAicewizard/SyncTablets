@@ -17,20 +17,26 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type config struct {
-	Colours     []string `yaml:"colours"`
-	ImagesCount uint64   `yaml:"imagesCount"`
-	Settings    struct {
-		IncludeColours bool   `yaml:"includeColours"`
-		IncludeImages  bool   `yaml:"includeImages"`
-		Mode           int64  `yaml:"mode"`
-		ScreenCount    uint64 `yaml:"screens"`
-		Delay          uint   `yaml:"delay"`
-	} `yaml:"settings`
-}
+type (
+	config struct {
+		Colours     []string `yaml:"colours"`
+		ImagesCount uint64   `yaml:"imagesCount"`
+		Settings    struct {
+			IncludeColours bool   `yaml:"includeColours"`
+			IncludeImages  bool   `yaml:"includeImages"`
+			Mode           int64  `yaml:"mode"`
+			ScreenCount    uint64 `yaml:"screens"`
+			Delay          uint   `yaml:"delay"`
+		} `yaml:"settings`
+	}
+	option struct {
+		left  func() string
+		right func() string
+	}
+)
 
 var (
-	options  []string
+	options  []option
 	closing  bool
 	settings config
 	values   map[string]interface{}
@@ -47,17 +53,26 @@ func main() {
 	log.Println(options)
 
 	if settings.Settings.IncludeImages {
+		log.Println("images are included")
+		var image option
 		for i := uint64(1); i <= settings.ImagesCount; i++ {
 			log.Println("added" + strconv.FormatUint(i, 10))
-			options = append(options, strconv.FormatUint(i, 10))
+			Cimage := strconv.FormatUint(i, 10)
+			image.left = func() string { return Cimage + "_0" }
+			image.right = func() string { return Cimage + "_1" }
+			options = append(options, image)
 		}
 	}
 	if settings.Settings.IncludeColours {
 		log.Println("colours are included")
-		log.Println(len(settings.Colours))
+		var colour option
 		for i := 0; i < len(settings.Colours); i++ {
-			log.Println("added" + settings.Colours[i])
-			options = append(options, settings.Colours[i])
+			value := settings.Colours[i]
+			colour.left = func() string { return value }
+			colour.right = func() string { return value }
+			settings.Colours[i] = "whoo"
+			log.Println("added" + colour.right())
+			options = append(options, colour)
 		}
 	}
 	fmt.Println(options)
@@ -156,7 +171,6 @@ func giveOver(mode uint64) {
 			// handle err
 		}
 		resp.Body.Close()
-
 	}
 }
 
@@ -164,8 +178,8 @@ func calcColours(lastTime time.Time) {
 	var (
 		diference   time.Duration
 		newTime     time.Time
-		random      string
-		random2     string
+		random      option
+		random2     option
 		idValues    map[string]interface{}
 		colorValues map[string]string
 	)
@@ -179,14 +193,15 @@ func calcColours(lastTime time.Time) {
 	}
 	newTime = time.Now()
 	values = make(map[string]interface{}, settings.Settings.ScreenCount)
-	fmt.Println(len(options))
-	random = options[rand.Intn(len(options))+1]
+	random = options[rand.Intn(len(options))]
 	for i := uint64(1); i < settings.Settings.ScreenCount; i++ {
 		idValues = make(map[string]interface{})
 		colorValues = make(map[string]string)
-		random2 = options[rand.Intn(len(options))+1]
-		colorValues["color_1"] = random
-		colorValues["color_2"] = random2
+		pos := rand.Intn(len(options))
+		fmt.Println(len(options))
+		random2 = options[pos]
+		colorValues["color_1"] = random.right()
+		colorValues["color_2"] = random2.left()
 		idValues["color"] = colorValues
 		idValues["pictures"] = settings.ImagesCount
 		values[strconv.FormatUint(i, 10)] = idValues
@@ -205,6 +220,7 @@ func calcColours(lastTime time.Time) {
 	if err != nil {
 		// handle err
 	}
+
 	resp.Body.Close()
 	println("---------------------------------------------------------------------")
 	calcColours(newTime)

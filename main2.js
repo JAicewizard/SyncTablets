@@ -2,8 +2,7 @@ var picture_count = 4;
 CurrentID = 0;
 lastID = 0
 pageLoaded = 0;
-reset = 0
-
+reset = 0;
 /*function getParameterByName( name ){
     name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
     var regexS = "[\\?&]"+name+"=([^&#]*)";
@@ -30,8 +29,8 @@ firebase.initializeApp(config);
 var idCount = firebase.database().ref('idCount');
 
 var previous = {
-    1: 1,
-    2: 1
+    1: "1_0",
+    2: "1_1"
 }
 
  callback = function(colors) {
@@ -40,10 +39,10 @@ var previous = {
     code[0] = colors.val().color.color_1;
     code[1] = colors.val().color.color_2;
 
-    console.info(parseInt(code[0]) == NaN)
-    console.info(parseInt(code[1]) == NaN)
-
-    if (isNaN(code[0])) {
+    console.info(parseInt(code[0]))
+    console.info(parseInt(code[1]))
+	console.log()
+    if (parseInt(code[0])==NaN) {
         document.getElementById("img_" + previous[1] + "_1").setAttribute("hidden","hidden");
         document.getElementById("color_1").style.backgroundColor = code[0]
     } else {
@@ -53,11 +52,10 @@ var previous = {
         previous[1] = code[0]
     }
 
-    if (isNaN(code[1])) {
+    if (parseInt(code[1])==NaN) {
         document.getElementById("img_" + previous[2] + "_2").setAttribute("hidden","hidden");
         document.getElementById("color_2").style.backgroundColor = code[1]
     } else {
-        console.log("stage2")
         document.getElementById("img_" + previous[2] + "_2").setAttribute("hidden","hidden");
         document.getElementById("color_2").style.backgroundColor = "white"
         document.getElementById("img_" + code[1] + "_2").removeAttribute("hidden")
@@ -98,18 +96,32 @@ window.onload =  function() {
       });*/
     for (i = 1; i <= picture_count; i++) {
         var image = document.createElement("img");
-        image.id = "img_"+i+"_1";
-        image.src = "assets/img_"+i+".png";
-        image.setAttribute("hidden","hidden");
-        image.setAttribute("style", 'min-height: 100%; min-width:100%;  float: left')
+        image.id = "img_"+i+"_0_1";
+        image.src = "assets/img_"+i+"_0.png";
+		image.setAttribute("style", 'min-height: 100%; min-width:100%;  float: right; image-rendering: optimizespeed')
+		image.setAttribute("hidden","hidden");
+        document.getElementById("color_1").appendChild(image);
+
+		image = document.createElement("img");
+        image.id = "img_"+i+"_1_1";
+		image.src = "assets/img_"+i+"_1.png";
+		image.setAttribute("style", 'min-height: 100%; min-width:100%;  float: left; image-rendering: optimizespeed')
+		image.setAttribute("hidden","hidden");
         document.getElementById("color_1").appendChild(image);
 
         image = document.createElement("img");
-        image.id = "img_"+i+"_2";        
-        image.src = "assets/img_"+i+".png";
-        image.setAttribute("hidden","hidden");
-        image.setAttribute("style", 'min-height: 100%; min-width:100%; float:right')
-        
+        image.id = "img_"+i+"_0_2";        
+        image.src = "assets/img_"+i+"_0.png";
+		image.setAttribute("style", 'min-height: 100%; min-width:100%; float:right; image-rendering: optimizespeed')
+		image.setAttribute("hidden","hidden");
+
+		document.getElementById("color_2").appendChild(image);
+		
+		image = document.createElement("img");
+        image.id = "img_"+i+"_1_2";        
+		image.src = "assets/img_"+i+"_1.png";
+		image.setAttribute("hidden","hidden");
+		image.setAttribute("style", 'min-height: 100%; min-width:100%; float:left; image-rendering: optimizespeed')
         document.getElementById("color_2").appendChild(image);
     }
 }
