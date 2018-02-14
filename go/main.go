@@ -20,7 +20,7 @@ import (
 
 type (
 	config struct {
-		Colours     []string `yaml:"colours"`
+		Options     []string `yaml:"options"`
 		ImagesCount uint64
 		Settings    struct {
 			Mode        int64  `yaml:"mode"`
@@ -52,8 +52,8 @@ func main() {
 	log.Println(options)
 
 	var newOption option
-	for i := 0; i < len(settings.Colours); i++ {
-		value := settings.Colours[i]
+	for i := 0; i < len(settings.Options); i++ {
+		value := settings.Options[i]
 		isImage, _ := regexp.MatchString("^[0-9]{1,}", value)
 		if isImage {
 			newOption.left = func() string { return value + "_0" }

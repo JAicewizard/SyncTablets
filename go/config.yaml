@@ -1,5 +1,5 @@
 ---
-colours:  #colours to be displayed
+options:  #colours to be displayed
   - 'green'
   - '4'
   - 'blue'
