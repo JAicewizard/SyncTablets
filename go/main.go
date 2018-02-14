@@ -21,10 +21,8 @@ import (
 type (
 	config struct {
 		Colours     []string `yaml:"colours"`
-		ImagesCount uint64   //`yaml:"imagesCount"`
+		ImagesCount uint64
 		Settings    struct {
-			//IncludeColours bool   `yaml:"includeColours"`
-			//IncludeImages  bool   `yaml:"includeImages"`
 			Mode        int64  `yaml:"mode"`
 			ScreenCount uint64 `yaml:"screens"`
 			Delay       uint   `yaml:"delay"`
