@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -20,14 +21,14 @@ import (
 type (
 	config struct {
 		Colours     []string `yaml:"colours"`
-		ImagesCount uint64   `yaml:"imagesCount"`
+		ImagesCount uint64   //`yaml:"imagesCount"`
 		Settings    struct {
-			IncludeColours bool   `yaml:"includeColours"`
-			IncludeImages  bool   `yaml:"includeImages"`
-			Mode           int64  `yaml:"mode"`
-			ScreenCount    uint64 `yaml:"screens"`
-			Delay          uint   `yaml:"delay"`
-		} `yaml:"settings`
+			//IncludeColours bool   `yaml:"includeColours"`
+			//IncludeImages  bool   `yaml:"includeImages"`
+			Mode        int64  `yaml:"mode"`
+			ScreenCount uint64 `yaml:"screens"`
+			Delay       uint   `yaml:"delay"`
+		}
 	}
 	option struct {
 		left  func() string
@@ -52,28 +53,19 @@ func main() {
 	fmt.Printf("%+v\n", settings)
 	log.Println(options)
 
-	if settings.Settings.IncludeImages {
-		log.Println("images are included")
-		var image option
-		for i := uint64(1); i <= settings.ImagesCount; i++ {
-			log.Println("added" + strconv.FormatUint(i, 10))
-			Cimage := strconv.FormatUint(i, 10)
-			image.left = func() string { return Cimage + "_0" }
-			image.right = func() string { return Cimage + "_1" }
-			options = append(options, image)
+	var newOption option
+	for i := 0; i < len(settings.Colours); i++ {
+		value := settings.Colours[i]
+		isImage, _ := regexp.MatchString("^[0-9]{1,}", value)
+		if isImage {
+			newOption.left = func() string { return value + "_0" }
+			newOption.right = func() string { return value + "_1" }
+			settings.ImagesCount++
+		} else {
+			newOption.left = func() string { return value }
+			newOption.right = func() string { return value }
 		}
-	}
-	if settings.Settings.IncludeColours {
-		log.Println("colours are included")
-		var colour option
-		for i := 0; i < len(settings.Colours); i++ {
-			value := settings.Colours[i]
-			colour.left = func() string { return value }
-			colour.right = func() string { return value }
-			settings.Colours[i] = "whoo"
-			log.Println("added" + colour.right())
-			options = append(options, colour)
-		}
+		options = append(options, newOption)
 	}
 	fmt.Println(options)
 	fmt.Println(options)
@@ -107,6 +99,7 @@ func giveOver(mode uint64) {
 		colorValues map[string]string
 		step        uint64
 	)
+
 	newTime = time.Now()
 	step = 0
 	Dstep := uint64(1)
@@ -130,14 +123,14 @@ func giveOver(mode uint64) {
 		}
 		newTime = time.Now()
 
-		array = make([]string, len(settings.Colours)*2)
-		array2 = make([]string, len(settings.Colours)*2)
-
-		for i, value := range settings.Colours {
-			array[i*2] = value
-			array[i*2+1] = value
-			array2[int(math.Mod(float64(i*2+1), float64(len(array2))))] = value
-			array2[int(math.Mod(float64(i*2+2), float64(len(array2))))] = value
+		array = make([]string, len(options)*2)
+		array2 = make([]string, len(options)*2)
+		arr2Length := float64(len(array2))
+		for i, value := range options {
+			array[i*2] = value.right()
+			array[i*2+1] = value.left()
+			array2[int(math.Mod(float64(i*2+1), arr2Length))] = value.right()
+			array2[int(math.Mod(float64(i*2+2), arr2Length))] = value.left()
 		}
 
 		//log.Println(array)

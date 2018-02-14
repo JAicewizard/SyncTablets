@@ -28,6 +28,8 @@ var config = {
 firebase.initializeApp(config);
 var idCount = firebase.database().ref('idCount');
 
+var imgTest = RegExp("[0-9]{1,}_[0-1]");
+
 var previous = {
     1: "1_0",
     2: "1_1"
@@ -39,10 +41,14 @@ var previous = {
     code[0] = colors.val().color.color_1;
     code[1] = colors.val().color.color_2;
 
-    console.info(parseInt(code[0]))
-    console.info(parseInt(code[1]))
-	console.log()
-    if (parseInt(code[0])==NaN) {
+	console.info(imgTest.test(code[0]))
+	console.info(code[0])
+
+	console.info(imgTest.test(code[1]))
+	console.info(code[1])
+
+
+	if (!imgTest.test(code[0])) {
         document.getElementById("img_" + previous[1] + "_1").setAttribute("hidden","hidden");
         document.getElementById("color_1").style.backgroundColor = code[0]
     } else {
@@ -52,7 +58,7 @@ var previous = {
         previous[1] = code[0]
     }
 
-    if (parseInt(code[1])==NaN) {
+    if (!imgTest.test(code[1])) {
         document.getElementById("img_" + previous[2] + "_2").setAttribute("hidden","hidden");
         document.getElementById("color_2").style.backgroundColor = code[1]
     } else {

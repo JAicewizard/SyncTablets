@@ -1,15 +1,18 @@
 ---
 colours:  #colours to be displayed
   - 'green'
+  - '4'
   - 'blue'
+  - '4'
   - 'yellow'
+  - '4'
   - 'pink'
+  - '4'
   - '#666666'
-imagesCount: 4 #amount of images to be displayed
 
 settings:
   includeColours: true  #use colours
   includeImages: true  #use images
-  mode: 0               #0: random colours, side matches side. 1: in order, skips 1/2 screen  2: in order only whole screens. 3: in order only half screens
+  mode: 1               #0: random colours, side matches side. 1: in order, skips 1/2 screen  2: in order only whole screens. 3: in order only half screens
   screens: 5            #the amount of screens that need to be set
   delay: 3             #the delay between slide showss
