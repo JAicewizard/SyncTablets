@@ -46,7 +46,7 @@ func main() {
 	if err != nil {
 		log.Print("could not open config file")
 	}
-	fmt.Printf("File contents: %s", configFile)
+	fmt.Printf("File contents:\n%s\n", configFile)
 	yaml.Unmarshal(configFile, &settings)
 	fmt.Printf("%+v\n", settings)
 	log.Println(options)
